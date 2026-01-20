@@ -6,6 +6,7 @@
 
 **SOURCES**
 - *Digital Design and Computer Architecture: RISC-V Edition* by Sarah L. Harris and David Harris
+- *RV32I Base Integer Instruction Set* - https://docs.riscv.org/reference/isa/unpriv/rv32.html
 - *Verilog Language and Application v29.0* Cadence Training
 - *Essential SystemVerilog for UVM v1.2.5* Cadence Training
 - I will keep adding more as I find them
