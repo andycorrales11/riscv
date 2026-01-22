@@ -9,6 +9,7 @@
 - *RV32I Base Integer Instruction Set* - https://docs.riscv.org/reference/isa/unpriv/rv32.html
 - *Verilog Language and Application v29.0* Cadence Training
 - *Essential SystemVerilog for UVM v1.2.5* Cadence Training
+- *Verilog Style Guide* - https://github.com/lowrisc/style-guides/blob/master/VerilogCodingStyle.md
 - I will keep adding more as I find them
 
 Please let me find a job soon
