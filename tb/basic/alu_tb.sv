@@ -3,34 +3,36 @@
 module alu_tb;
 
   typedef enum logic[3:0] {
-      ALU_ADD = 4'b0000,
-      ALU_SUB = 4'b0001,
-      ALU_AND = 4'b0010,
-      ALU_OR  = 4'b0011,
-      ALU_XOR = 4'b0100,
-      ALU_LT  = 4'b0101,
-      ALU_GT  = 4'b0110 
-    } alu_op_t;
+    ALU_ADD = 4'b0000,
+    ALU_SUB = 4'b0001,
+    ALU_AND = 4'b0010,
+    ALU_OR  = 4'b0011,
+    ALU_XOR = 4'b0100,
+    ALU_LT  = 4'b0101,
+    ALU_GT  = 4'b0110 
+  } alu_op_e;
 
   logic    [31:0] num1;
   logic    [31:0] num2;
-  alu_op_t        operand;
+  alu_op_e        operand;
   logic    [31:0] result;
 
   integer tests_run    = 0;
   integer tests_passed = 0;
   integer tests_failed = 0;
 
-  alu dut(
-      .num1(num1),
-      .num2(num2),
-      .opcode(operand),
-      .result(result)
+  alu dut (
+    .num1(num1),
+    .num2(num2),
+    .opcode(operand),
+    .result(result)
+  );
+
+  task check_result (
+    input logic [31:0] expected, 
+    input string       test_name
     );
 
-  task check_result(input logic [31:0] expected, 
-                    input string       test_name
-    );
     tests_run++;
     #10;
 
@@ -48,12 +50,12 @@ module alu_tb;
   endtask
 
   task run_test(
-      input logic [31:0] a, 
-      input logic [31:0] b, 
-      input alu_op_t     op, 
-      input logic [31:0] expected, 
-      input string       test_name
-    );
+    input logic [31:0] a, 
+    input logic [31:0] b, 
+    input alu_op_e     op, 
+    input logic [31:0] expected, 
+    input string       test_name
+  );
 
     num1    = a;
     num2    = b;

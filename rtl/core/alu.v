@@ -1,11 +1,11 @@
 `timescale 1ns/1ps
 
-module alu(
-    input wire [3:0]  opcode,
-    input wire [31:0] num1,
-    input wire [31:0] num2,
-    output reg [31:0] result
-  );
+module alu (
+  input wire [3:0]  opcode,
+  input wire [31:0] num1,
+  input wire [31:0] num2,
+  output reg [31:0] result
+);
 
   always @(*) begin
     case (opcode)
