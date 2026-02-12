@@ -6,7 +6,7 @@ module instruction_memory (
   output logic [31:0] instruction
 );
 
-  logic [31:0] memory [64:0];
+  logic [31:0] memory [63:0];
 
   assign instruction = memory[address];
 
