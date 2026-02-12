@@ -14,8 +14,8 @@ module alu (
       2: result = num1 & num2; // and
       3: result = num1 | num2; // or
       4: result = num1 ^ num2; // xor
-//    5: result = num1 < num2; // less than
-//    6: result = num1 > num2; // greater than
+      5: result = num1 < num2; // less than
+      6: result = num1 > num2; // greater than
       // add more later
     endcase
   end

@@ -8,7 +8,7 @@ module instruction_memory (
 
   reg [31:0] memory [64:0];
 
-  assign instruction = memory[read_address];
+  assign instruction = memory[address];
 
   int i;
 
