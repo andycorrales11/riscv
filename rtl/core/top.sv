@@ -1,11 +1,11 @@
 `timescale 1ns/1ps
 
-module riscv_core (
-  input wire clk, 
-  input wire reset
+module top (
+  input logic clk, 
+  input logic reset
 );
 
-  wire [31:0] instruction_a;
+  logic [31:0] instruction_a;
 
   program_counter program_counter(
     .clk(clk),
