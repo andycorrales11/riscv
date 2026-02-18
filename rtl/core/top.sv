@@ -9,11 +9,12 @@ module top (
                instruction_out,
                read_data1,
                read_data2,
-               num2;
+               num2,
+               data_memory_read_data,
+               alu_result;
+               write_data;
   
-  logic        alu_src;
-
-  assign alu_src = 1'b0; // for now, always use register value as num2
+  logic        branch, mem_read, alu_src, mem_write, mem_to_reg, reg_write;
 
   program_counter program_counter(
     .clk(clk),
@@ -35,7 +36,7 @@ module top (
     .rs1(),
     .rs2(),
     .rd(),
-    .write_data(),
+    .write_data(write_data),
     .read_data1(read_data1),
     .read_data2(read_data2),
   );
@@ -43,8 +44,8 @@ module top (
   alu alu(
     .opcode(),
     .num1(read_data1),
-    .num2(),
-    .result()
+    .num2(num2),
+    .result(alu_result),
     .zero()
   );
 
@@ -54,4 +55,23 @@ module top (
     .in1(),
     .out(num2)
   );
+
+  data_memory data_memory(
+    .clk(clk),
+    .mem_write(mem_write),
+    .mem_read(mem_read),
+    .reset(reset),
+    .address(alu_result),
+    .write_data(read_data2),
+    .read_data(data_memory_read_data)
+  );
+
+  data_mux mux2(
+    .sel(mem_to_reg),
+    .in0(alu_result),
+    .in1(data_memory_read_data),
+    .out(write_data)
+  )
+
+
 endmodule
