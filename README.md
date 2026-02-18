@@ -1,5 +1,8 @@
 # RISC-V Processor Design and Verification Project
 
+What I have so far:
+![RISC-V Diagram](riscv.png)
+
 **GOAL**: Design and then verify a RISC-V processor core to improve my skills, over the span of a year, to improve my digital design and verification skills.  
 **CHALLENGES**: All HDL will be written by me, on my Thinkpad X1 Carbon 2nd Gen, running Linux Mint, using Neovim. No AI will write a single line of code.  
 **TOOLS**: I will use Verilator and GTKWave, two open source programs, to simulate and view waveforms.  

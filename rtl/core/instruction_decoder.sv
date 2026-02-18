@@ -10,8 +10,8 @@ module instruction_decoder (
   output logic [4:0] rs2,
   output logic [6:0] funct7
 
-)
-  // Extract fields from the instruction
+);
+
   assign opcode = instruction[6:0];
   assign rd     = instruction[11:7];
   assign funct3 = instruction[14:12];

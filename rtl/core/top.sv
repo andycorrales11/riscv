@@ -63,8 +63,18 @@ module top (
     .read_data2(read_data2),
   );
 
-  alu alu(
+  controller controller(
     .opcode(opcode),
+    .branch(branch),
+    .mem_read(mem_read),
+    .alu_src(alu_src),
+    .mem_write(mem_write),
+    .mem_to_reg(mem_to_reg),
+    .reg_write(reg_write)
+  );
+
+  alu alu(
+    .opcode({funct7, funct3}),
     .num1(read_data1),
     .num2(num2),
     .result(alu_result),

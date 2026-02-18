@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 
 module alu (
-  input  logic [3:0]  opcode,
+  input  logic [10:0] opcode,
   input  logic [31:0] num1,
   input  logic [31:0] num2,
   output logic [31:0] result,
@@ -10,14 +10,16 @@ module alu (
 
   always_comb begin
     case (opcode)
-      0: result = num1 + num2; // add
-      1: result = num1 - num2; // sub
-      2: result = num1 & num2; // and
-      3: result = num1 | num2; // or
-      4: result = num1 ^ num2; // xor
-      5: result = (num1 < num2) ? 32'h00000001 : 32'h00000000; // less than
-      6: result = (num1 > num2) ? 32'h00000001 : 32'h00000000; // greater than
-      // add more later
+      11'b00000000000: result = num1 + num2; // ADD
+      11'b01000000000: result = num1 - num2; // SUB
+      11'b00000000001: result = num1 << num2[4:0]; // SLL
+      11'b00000000010: result = $signed(num1) < $signed(num2) ? 32'h1 : 32'h0; // SLT
+      11'b00000000100: result = num1 ^ num2; // XOR
+      11'b00000000101: result = num1 >> num2[4:0]; // SRL
+      11'b01000000101: result = $signed(num1) >>> num2[4:0]; // SRA
+      11'b00000000110: result = num1 | num2; // OR
+      11'b00000000111: result = num1 & num2; // AND
+      default: result = 32'h0;
     endcase
   end
 
