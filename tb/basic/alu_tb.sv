@@ -16,6 +16,7 @@ module alu_tb;
   logic    [31:0] num2;
   alu_op_e        operand;
   logic    [31:0] result;
+  logic           zero;
 
   integer tests_run    = 0;
   integer tests_passed = 0;
@@ -25,7 +26,8 @@ module alu_tb;
     .num1(num1),
     .num2(num2),
     .opcode(operand),
-    .result(result)
+    .result(result),
+    .zero(zero)
   );
 
   task check_result (
@@ -35,6 +37,14 @@ module alu_tb;
 
     tests_run++;
     #10;
+
+    if (zero !== (expected == 32'h0)) begin
+      $display("[FAIL] %s - Zero flag incorrect", test_name);
+      $display("Expected zero: %b, Got zero: %b", (expected == 32'h0), zero);
+      tests_failed++;
+      $display("");
+      return;
+    end
 
     if (result == expected) begin
       $display("[PASS] %s", test_name);
@@ -79,6 +89,7 @@ module alu_tb;
     run_test(2, 2, ALU_ADD, 4, "ADD: 2 + 2 = 4");
     run_test(5, 8, ALU_ADD, 13, "ADD: 5 + 8 = 13");
     run_test(10, 10, ALU_ADD, 20, "ADD: 10 + 10 = 20");
+    run_test(0, 0, ALU_ADD, 0, "ADD: 0 + 0 = 0");
 
     $display("Testing SUB");
 
