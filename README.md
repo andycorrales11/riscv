@@ -13,6 +13,7 @@ What I have so far:
 - *Verilog Language and Application v29.0* Cadence Training
 - *Essential SystemVerilog for UVM v1.2.5* Cadence Training
 - *Verilog Style Guide* - https://github.com/lowrisc/style-guides/blob/master/VerilogCodingStyle.md
+- *RISC-V Instruction Reference* - https://www.cs.sfu.ca/~ashriram/Courses/CS295/assets/notebooks/RISCV/RISCV_CARD.pdf
 - I will keep adding more as I find them
 
 Please let me find a job soon
