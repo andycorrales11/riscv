@@ -26,8 +26,16 @@ module controller (
         mem_read = 1;
         alu_src = 1;
         mem_write = 0;
-        mem_to_reg = (opcode == 7'b0000011) ? 1 : 0; // Load instructions set mem_to_reg to 1
+        mem_to_reg = (opcode[4] == 1'b1) ? 1 : 0; // Load instructions set mem_to_reg to 1
         reg_write = 1;
+      end
+      7'b0100011: begin // S-type
+        branch = 0;
+        mem_read = 0;
+        alu_src = 1;
+        mem_write = 1;
+        mem_to_reg = 0;
+        reg_write = 0;
       end
       default: begin
         branch = 0;

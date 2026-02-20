@@ -98,6 +98,7 @@ module top (
     .mem_write(mem_write),
     .mem_read(mem_read),
     .reset(reset),
+    .width(funct3),
     .address(alu_result),
     .write_data(read_data2),
     .read_data(data_memory_read_data)
