@@ -26,16 +26,10 @@ R_RTL = \
 
 R_TB = $(TB_DIR)/rtype_tb.sv
 
-# Verilator flags
 VFLAGS = --cc --trace --exe --build
-
-# Top module
-TOP = alu_tb
-
-# Output directory
+TOP_ALU = alu_tb
+TOP_RTYPE = rtype_tb
 BUILD_DIR = sim/obj_dir
-
-# Waveform file
 WAVE = sim/waves.vcd
 
 # Default target
