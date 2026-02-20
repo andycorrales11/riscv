@@ -16,4 +16,6 @@ What I have so far:
 - *RISC-V Instruction Reference* - https://www.cs.sfu.ca/~ashriram/Courses/CS295/assets/notebooks/RISCV/RISCV_CARD.pdf
 - I will keep adding more as I find them
 
+[architecture.md]
+
 Please let me find a job soon
