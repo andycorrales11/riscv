@@ -82,7 +82,10 @@ module top (
   );
 
   sign_extender sign_extender(
-    .imm_12({funct7, rs2}),
+    .funct7(funct7),
+    .rs2(rs2),
+    .rd(rd),
+    .opcode(opcode),
     .imm_ex(imm12)
   );
 
