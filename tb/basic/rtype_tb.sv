@@ -36,6 +36,7 @@ module rtype_tb;
   );
     logic [31:0] read_data;
     read_data = dut.register_file.registers[rd];
+    $display("Reading Register x%0d for test: %s", rd, test_name);
     if (read_data === expected) begin
       $display("[PASS] %s", test_name);
       $display("Expected: 0x%08h, Got: 0x%08h", expected, read_data);
