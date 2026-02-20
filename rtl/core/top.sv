@@ -12,7 +12,7 @@ module top (
                num2,
                data_memory_read_data,
                alu_result,
-               write_data;
+               write_data,
                imm12;
 
   logic        branch, 
