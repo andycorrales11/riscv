@@ -11,9 +11,10 @@ module top (
                read_data2,
                num2,
                data_memory_read_data,
-               alu_result;
+               alu_result,
                write_data;
-  
+               imm12;
+
   logic        branch, 
                mem_read, 
                alu_src, 
@@ -25,7 +26,6 @@ module top (
   logic [4:0]  rd, rs1, rs2;
   logic [2:0]  funct3;
   logic [6:0]  funct7;
-  logic [11:0] imm12;
   
 
   program_counter program_counter(
@@ -60,7 +60,7 @@ module top (
     .rd(rd),
     .write_data(write_data),
     .read_data1(read_data1),
-    .read_data2(read_data2),
+    .read_data2(read_data2)
   );
 
   controller controller(
@@ -89,7 +89,7 @@ module top (
     .imm_ex(imm12)
   );
 
-  i_mux mux2(
+  mux2 i_mux(
     .sel(alu_src),
     .in0(read_data2),
     .in1(imm12),
@@ -107,12 +107,12 @@ module top (
     .read_data(data_memory_read_data)
   );
 
-  data_mux mux2(
+  mux2 data_mux(
     .sel(mem_to_reg),
     .in0(alu_result),
     .in1(data_memory_read_data),
     .out(write_data)
-  )
+  );
 
 
 endmodule

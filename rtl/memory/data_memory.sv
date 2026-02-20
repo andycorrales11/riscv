@@ -5,12 +5,12 @@ module data_memory (
   input logic        mem_write,
   input logic        mem_read,
   input logic        reset,
-  input logic [2:0]  width
+  input logic [2:0]  width,
   input logic [31:0] address,
   input logic [31:0] write_data,
 
   output logic [31:0] read_data
-)
+);
 
   logic [31:0] memory [63:0];
 

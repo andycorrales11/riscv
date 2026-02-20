@@ -12,7 +12,7 @@ module instruction_memory (
 
   int i;
 
-  always_latch @(posedge reset) begin
+  always_ff @(posedge reset) begin
     for (i = 0; i < 64; i = i + 1) begin
       memory[i] = 32'h00000000;
     end
