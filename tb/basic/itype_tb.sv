@@ -1,8 +1,8 @@
 `timescale 1ns/1ps
 
-module rtype_tb;
+module itype_tb;
 
-  parameter logic [6:0] R_TYPE = 7'b0110011;
+  parameter logic [6:0] I_TYPE = 7'b0010011;
 
   logic clk;
   logic reset;
@@ -17,16 +17,15 @@ module rtype_tb;
   );
 
   initial clk = 1'b0;
-  always #5 clk = ~clk;
+  always #1 clk = ~clk;
 
-  function automatic logic [31:0] encode_r_type(
-    input logic [6:0] funct7,
-    input logic [4:0] rs2, 
+  function automatic logic [31:0] encode_i_type(
+    input logic [11:0] imm, 
     input logic [4:0] rs1, 
     input logic [2:0] funct3, 
     input logic [4:0] rd
   );
-    return {funct7, rs2, rs1, funct3, rd, R_TYPE};
+    return {imm, rs1, funct3, rd, I_TYPE};
   endfunction
 
   task automatic check_reg(
@@ -47,32 +46,31 @@ module rtype_tb;
       tests_failed++;
     end
     $display("");
+    tests_run++;
   endtask
 
-  task automatic test_r_type();
+  task automatic test_i_type();
     logic [31:0] instruction;
     logic [31:0] a, b, result;
 
     reset = 1'b1;
+    #1
     reset = 1'b0;
 
-    #1;
+    dut.instruction_memory.memory[0] = encode_i_type(12'b000000000001, 5'd1, 3'b000, 5'd2); // ADD x2, 1, x1
 
-    dut.instruction_memory.memory[0] = encode_r_type(7'b0000000, 5'd2, 5'd1, 3'b000, 5'd3); // ADD x3, x1, x2
+    #5;
 
-    @(posedge clk);
-    @(posedge clk);
-
-    check_reg(5'd3, 32'h00000003, "R-type ADD: x3 = x1 + x2");
+    check_reg(5'd2, 32'h00000001, "I-type ADD: x2 = x1 + 1");
 
   endtask
 
   initial begin
     $dumpfile("sim/waves/riscv_tb.vcd");
-    $display("R-type Instruction Testbench");
+    $display("I-type Instruction Testbench");
     $display("");
 
-    test_r_type();
+    test_i_type();
 
     $display("Tests run: %0d, Passed: %0d, Failed: %0d", tests_run, tests_passed, tests_failed);
     $finish;

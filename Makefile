@@ -12,7 +12,7 @@ ALU_RTL = $(RTL_DIR)/alu.sv
 ALU_TB = $(TB_DIR)/alu_tb.sv
 
 # R instruction Test
-R_RTL = \
+RTL = \
   $(COM_DIR)/mux2.sv \
   $(MEM_DIR)/instruction_memory.sv \
   $(MEM_DIR)/data_memory.sv \
@@ -25,10 +25,17 @@ R_RTL = \
   $(RTL_DIR)/top.sv
 
 R_TB = $(TB_DIR)/rtype_tb.sv
+I_TB = $(TB_DIR)/itype_tb.sv
 
+# Verilator flags
 VFLAGS = --cc --trace --exe --build
+
+# Top module
 TOP_ALU = alu_tb
 TOP_RTYPE = rtype_tb
+TOP_ITYPE = itype_tb
+
+# Build and wave files
 BUILD_DIR = sim/obj_dir
 WAVE = sim/waves.vcd
 
@@ -47,18 +54,28 @@ compile_alu: $(ALU_RTL) $(ALU_TB)
 		-Mdir $(BUILD_DIR)
 	@echo "Build complete!"
 
-compile_rtype: $(R_RTL) $(R_TB)
+compile_rtype: $(RTL) $(R_TB)
 	@echo "Compiling R-type instruction testbench..."
 	verilator $(VFLAGS) \
-		$(R_RTL) \
+		$(RTL) \
 		$(R_TB) \
 		rtype_tb_wrapper.cpp \
 		--top-module $(TOP_RTYPE) \
 		--timing \
 		-Mdir $(BUILD_DIR)
+
+compile_itype: $(RTL) $(I_TB)
+	@echo "Compiling I-type instruction testbench..."
+	verilator $(VFLAGS) \
+		$(RTL) \
+		$(I_TB) \
+		itype_tb_wrapper.cpp \
+		--top-module $(TOP_ITYPE) \
+		--timing \
+		-Mdir $(BUILD_DIR)
 	@echo "Build complete!"
 
-compile: compile_alu compile_rtype
+compile: compile_alu compile_rtype compile_itype
 
 # Run simulation
 sim_alu: compile_alu
@@ -71,7 +88,12 @@ sim_rtype: compile_rtype
 	./$(BUILD_DIR)/V$(TOP_RTYPE)
 	@echo "Simulation complete!"
 
-sim: sim_alu sim_rtype
+sim_itype: compile_itype
+	@echo "Running I-type instruction simulation..."
+	./$(BUILD_DIR)/V$(TOP_ITYPE)
+	@echo "Simulation complete!"
+
+sim: sim_alu sim_rtype sim_itype
 
 # View waveforms
 waves: sim
