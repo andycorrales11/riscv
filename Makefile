@@ -27,8 +27,8 @@ RTL = \
 
 R_TB = $(TB_DIR)/rtype_tb.sv
 I_TB = $(TB_DIR)/itype_tb.sv
-inst_tb = $(TB_DIR)/instruction_tb.sv
-inst_pkg = $(PKG_DIR)/rv32i_pkg.sv
+INST_TB = $(TB_DIR)/instruction_tb.sv
+INST_PKG = $(PKG_DIR)/rv32i_pkg.sv
 
 # Verilator flags
 VFLAGS = --cc --trace --exe --build
@@ -83,8 +83,8 @@ compile:
 	@echo "Compiling instruction testbench..."
 	verilator $(VFLAGS) \
 		$(RTL) \
-		$(inst_pkg) \
-		$(inst_tb) \
+		$(INST_PKG) \
+		$(INST_TB) \
 		instruction_tb_wrapper.cpp \
 		--top-module $(TOP_INST) \
 		--timing \
@@ -107,7 +107,7 @@ sim_itype: compile_itype
 	./$(BUILD_DIR)/V$(TOP_ITYPE)
 	@echo "Simulation complete!"
 
-sim: 
+sim: compile
 	@echo "Running instruction simulation..."
 	./$(BUILD_DIR)/V$(TOP_INST)
 	@echo "Simulation complete!"
