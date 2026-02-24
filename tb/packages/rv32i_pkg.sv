@@ -28,6 +28,7 @@ package rv32i_pkg;
     input logic [2:0] funct3, 
     input logic [4:0] rd
   );
+    $display("Encoding R-Type instruction with funct7=0x%0h, rs2=%0d, rs1=%0d, funct3=%0b, rd=%0d", funct7, rs2, rs1, funct3, rd);
     return {funct7, rs2, rs1, funct3, rd, R_TYPE};
   endfunction
 
@@ -37,6 +38,7 @@ package rv32i_pkg;
     input logic [2:0] funct3, 
     input logic [4:0] rd
   );
+    $display("Encoding I-Type instruction with imm=0x%0h, rs1=%0d, funct3=%0b, rd=%0d", imm, rs1, funct3, rd);
     return {imm, rs1, funct3, rd, I_TYPE};
   endfunction
 

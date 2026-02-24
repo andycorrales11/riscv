@@ -25,9 +25,11 @@ module instruction_tb;
     reset = 1'b0;
     for (int i = 0; i < instructions.size(); i++) begin
       dut.instruction_memory.memory[i] = instructions[i];
-      dut.program_counter.pc_out = i; // Set PC to the instruction address
-      @(posedge clk); // Wait for the instruction to be fetched and executed
-      @(posedge clk); // Wait for the next cycle to ensure execution completes
+      $display("Loading instruction 0x%32b at address %0d", instructions[i], i);
+    end
+    // Run for enough cycles to execute all instructions
+    for (int cycle = 0; cycle < instructions.size() + 1; cycle++) begin
+      @(posedge clk);
     end
   endtask
 
@@ -52,62 +54,83 @@ module instruction_tb;
     tests_run++;
   endtask
 
+  task automatic check_dmem(
+    input logic [31:0] addr,
+    input logic [31:0] expected,
+    input string       test_name
+  );
+    logic [31:0] read_data;
+    read_data = dut.data_memory.memory[addr];
+    $display("Reading data memory[%0d] for test: %s", addr, test_name);
+    if (read_data === expected) begin
+      $display("[PASS] %s", test_name);
+      $display("Expected: 0x%08h, Got: 0x%08h", expected, read_data);
+      tests_passed++;
+    end else begin
+      $display("[FAIL] %s", test_name);
+      $display("Expected: 0x%08h, Got: 0x%08h", expected, read_data);
+      tests_failed++;
+    end
+    $display("");
+    tests_run++;
+  endtask
+
   task automatic test_r_type();
     logic [31:0] instructions[] = new[3];
     $display("Testing R-Type instructions");
     // ADD: x3 = x1(1) + x2(2) = 3
-    instructions[0] = encode_i_type(12'b000000000001, 5'd1, F3_ADD_SUB, 5'd1); 
-    instructions[1] = encode_i_type(12'b000000000010, 5'd2, F3_ADD_SUB, 5'd2); 
-    instructions[2] = encode_r_type(F7_DEFAULT, 5'd2, 5'd1, F3_ADD_SUB, 5'd3); 
-    check_reg(5'd3, 32'h00000003, "R-type ADD: 3 = 1 + 2");
-
-    //SUB x3 = x1(7) - x2(4) = 3
-    instructions[0] = encode_i_type(12'b000000000111, 5'd1, F3_ADD_SUB, 5'd1); 
-    instructions[1] = encode_i_type(12'b000000000100, 5'd2, F3_ADD_SUB, 5'd2); 
-    instructions[2] = encode_r_type(F7_ALT, 5'd2, 5'd1, F3_ADD_SUB, 5'd3); 
+    instructions[0] = encode_i_type(12'd1, 5'd0, F3_ADD_SUB, 5'd1);  // ADDI x1, x0, 1
+    instructions[1] = encode_i_type(12'd2, 5'd0, F3_ADD_SUB, 5'd2);  // ADDI x2, x0, 2
+    instructions[2] = encode_r_type(F7_DEFAULT, 5'd2, 5'd1, F3_ADD_SUB, 5'd3);
     run_program(instructions);
-    check_reg(5'd3, 32'h00000003, "R-type SUB: 3 = 7 - 4");
+    check_reg(5'd3, 32'd3, "R-type ADD: 3 = 1 + 2");
 
-    //AND x3 = x1(0b1100) & x2(0b1010) = 0b1000
-    instructions[0] = encode_i_type(12'b000000001100, 5'd1, F3_ADD_SUB, 5'd1); 
-    instructions[1] = encode_i_type(12'b000000001010, 5'd2, F3_ADD_SUB, 5'd2); 
+    // SUB: x3 = x1(7) - x2(4) = 3
+    instructions[0] = encode_i_type(12'd7, 5'd0, F3_ADD_SUB, 5'd1);  // ADDI x1, x0, 7
+    instructions[1] = encode_i_type(12'd4, 5'd0, F3_ADD_SUB, 5'd2);  // ADDI x2, x0, 4
+    instructions[2] = encode_r_type(F7_ALT, 5'd2, 5'd1, F3_ADD_SUB, 5'd3);
+    run_program(instructions);
+    check_reg(5'd3, 32'd3, "R-type SUB: 3 = 7 - 4");
+
+    // AND: x3 = x1(0b1100) & x2(0b1010) = 0b1000 = 8
+    instructions[0] = encode_i_type(12'd12, 5'd0, F3_ADD_SUB, 5'd1); // ADDI x1, x0, 12
+    instructions[1] = encode_i_type(12'd10, 5'd0, F3_ADD_SUB, 5'd2); // ADDI x2, x0, 10
     instructions[2] = encode_r_type(F7_DEFAULT, 5'd2, 5'd1, F3_AND, 5'd3);
     run_program(instructions);
-    check_reg(5'd3, 32'h00000008, "R-type AND: 0b1000 = 0b1100 & 0b1010");
+    check_reg(5'd3, 32'd8, "R-type AND: 8 = 0b1100 & 0b1010");
 
-    //OR x3 = x1(0b1100) | x2(0b1010) = 0b1100
-    instructions[0] = encode_i_type(12'b000000001100, 5'd1, F3_ADD_SUB, 5'd1); 
-    instructions[1] = encode_i_type(12'b000000001010, 5'd2, F3_ADD_SUB, 5'd2); 
+    // OR: x3 = x1(0b1100) | x2(0b1010) = 0b1110 = 14
+    instructions[0] = encode_i_type(12'd12, 5'd0, F3_ADD_SUB, 5'd1); // ADDI x1, x0, 12
+    instructions[1] = encode_i_type(12'd10, 5'd0, F3_ADD_SUB, 5'd2); // ADDI x2, x0, 10
     instructions[2] = encode_r_type(F7_DEFAULT, 5'd2, 5'd1, F3_OR, 5'd3);
     run_program(instructions);
-    check_reg(5'd3, 32'h0000000C, "R-type OR: 0b1100 = 0b1100 | 0b1010");
+    check_reg(5'd3, 32'd14, "R-type OR: 14 = 0b1100 | 0b1010");
 
-    //XOR x3 = x1(0b1100) ^ x2(0b1010) = 0b0100
-    instructions[0] = encode_i_type(12'b000000001100, 5'd1, F3_ADD_SUB, 5'd1); 
-    instructions[1] = encode_i_type(12'b000000001010, 5'd2, F3_ADD_SUB, 5'd2); 
-    instructions[2] = encode_r_type(F7_DEFAULT, 5'd2, 5'd1, F3_XOR, 5'd3);  
+    // XOR: x3 = x1(0b1100) ^ x2(0b1010) = 0b0110 = 6
+    instructions[0] = encode_i_type(12'd12, 5'd0, F3_ADD_SUB, 5'd1); // ADDI x1, x0, 12
+    instructions[1] = encode_i_type(12'd10, 5'd0, F3_ADD_SUB, 5'd2); // ADDI x2, x0, 10
+    instructions[2] = encode_r_type(F7_DEFAULT, 5'd2, 5'd1, F3_XOR, 5'd3);
     run_program(instructions);
-    check_reg(5'd3, 32'h00000004, "R-type XOR: 0b0100 = 0b1100 ^ 0b1010");
-    
+    check_reg(5'd3, 32'd6, "R-type XOR: 6 = 0b1100 ^ 0b1010");
 
   endtask
 
   task automatic test_s_type();
     logic [31:0] instructions[] = new[3];
     $display("Testing S-Type instructions");
-    // Store word: MEM[0] = x1(0xDEADBEEF)
-    instructions[0] = encode_i_type(12'b000000000000, 5'd1, F3_ADD_SUB, 5'd1); 
-    instructions[1] = encode_i_type(12'b000000000000, 5'd2, F3_ADD_SUB, 5'd2); 
-    instructions[2] = encode_s_type(12'b000000000000, 5'd1, 5'd2, F3_SW); 
+    // SW: store x1(42) to data_memory[5]
+    instructions[0] = encode_i_type(12'd42, 5'd0, F3_ADD_SUB, 5'd1); // ADDI x1, x0, 42
+    instructions[1] = encode_i_type(12'd5,  5'd0, F3_ADD_SUB, 5'd2); // ADDI x2, x0, 5
+    instructions[2] = encode_s_type(12'd0, 5'd1, 5'd2, F3_SW);        // SW x1, 0(x2)
     run_program(instructions);
-    check_reg(5'd1, 32'hDEADBEEF, "S-type SW: MEM[0] = 0xDEADBEEF");
+    check_dmem(32'd5, 32'd42, "S-type SW: data_memory[5] = 42");
   endtask
 
   initial begin
     $dumpfile("sim/waves/riscv_tb.vcd");
     $display("Instruction Testbench");
     $display("");
-
+    dut.program_counter.pc_out = 32'h0; // Start at address 0
     test_r_type();
     test_s_type();
 

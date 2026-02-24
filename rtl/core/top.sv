@@ -13,7 +13,9 @@ module top (
                data_memory_read_data,
                alu_result,
                write_data,
-               imm12;
+               imm_ex,
+               pc_next,
+               pc_plus1;
 
   logic        branch, 
                mem_read, 
@@ -27,11 +29,13 @@ module top (
   logic [2:0]  funct3;
   logic [6:0]  funct7;
   
+  assign pc_plus1 = instruction_a + 1;
+  assign pc_next = pc_plus1; // sequential execution for now
 
   program_counter program_counter(
     .clk(clk),
     .reset(reset),
-    .pc_in(),
+    .pc_in(pc_next),
     .pc_out(instruction_a)
   );
 
@@ -82,17 +86,14 @@ module top (
   );
 
   sign_extender sign_extender(
-    .funct7(funct7),
-    .rs2(rs2),
-    .rd(rd),
-    .opcode(opcode),
-    .imm_ex(imm12)
+    .instruction(instruction_out),
+    .imm_ex(imm_ex)
   );
 
   mux2 i_mux(
     .sel(alu_src),
     .in0(read_data2),
-    .in1(imm12),
+    .in1(imm_ex),
     .out(num2)
   );
 
