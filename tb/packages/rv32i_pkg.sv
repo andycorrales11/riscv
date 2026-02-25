@@ -48,6 +48,7 @@ package rv32i_pkg;
     input logic [4:0]  rs1,
     input logic [2:0]  funct3
   );
+    $display("Encoding S-Type instruction with imm[11:5]=0x%0h, rs2=%0d, rs1=%0d, funct3=%0b, imm[4:0]=0x%0h", imm[11:5], rs2, rs1, funct3, imm[4:0]);
     return {imm[11:5], rs2, rs1, funct3, imm[4:0], S_TYPE};
   endfunction
 

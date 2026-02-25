@@ -81,6 +81,7 @@ module top (
     .opcode({funct7, funct3}),
     .num1(read_data1),
     .num2(num2),
+    .store_op(mem_write),
     .result(alu_result),
     .zero()
   );

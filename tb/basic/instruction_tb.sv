@@ -25,7 +25,7 @@ module instruction_tb;
     reset = 1'b0;
     for (int i = 0; i < instructions.size(); i++) begin
       dut.instruction_memory.memory[i] = instructions[i];
-      $display("Loading instruction 0x%32b at address %0d", instructions[i], i);
+      $display("Loading instruction 0x%8h at address %0d", instructions[i], i);
     end
     // Run for enough cycles to execute all instructions
     for (int cycle = 0; cycle < instructions.size() + 1; cycle++) begin
@@ -75,6 +75,21 @@ module instruction_tb;
     tests_run++;
   endtask
 
+  task automatic test_i_type();
+
+    // ADDI: x1 = x0(0) + 32 = 32 FAILS
+    instruction[0] = encode_i_type(12'd32, 5'd0, F3_ADD_SUB, 5'd1); // ADDI x1, x0, 32
+    run_program(instruction);
+    check_reg(5'd1, 32'd32, "I-type ADDI: 32 = 0 + 32");
+
+    // ADDI: x1 = x0(0) + 30 = 30 PASSES
+    instruction[0] = encode_i_type(12'd30, 5'd0, F3_ADD_SUB, 5'd1); // ADDI x1, x0, 30
+    run_program(instruction);
+    check_reg(5'd1, 32'd30, "I-type ADDI: 30 = 0 + 30");
+    
+  endtask
+
+
   task automatic test_r_type();
     logic [31:0] instructions[] = new[3];
     $display("Testing R-Type instructions");
@@ -119,11 +134,11 @@ module instruction_tb;
     logic [31:0] instructions[] = new[3];
     $display("Testing S-Type instructions");
     // SW: store x1(42) to data_memory[5]
-    instructions[0] = encode_i_type(12'd42, 5'd0, F3_ADD_SUB, 5'd1); // ADDI x1, x0, 42
+    instructions[0] = encode_i_type(12'd12, 5'd0, F3_ADD_SUB, 5'd1); // ADDI x1, x0, 12
     instructions[1] = encode_i_type(12'd5,  5'd0, F3_ADD_SUB, 5'd2); // ADDI x2, x0, 5
-    instructions[2] = encode_s_type(12'd0, 5'd1, 5'd2, F3_SW);        // SW x1, 0(x2)
+    instructions[2] = encode_s_type(12'd0, 5'd1, 5'd2, F3_SW);       // SW x1, x2 -> data_memory[5] = 12
     run_program(instructions);
-    check_dmem(32'd5, 32'd42, "S-type SW: data_memory[5] = 42");
+    check_dmem(32'd5, 32'd12, "S-type SW: data_memory[5] = 12");
   endtask
 
   initial begin
@@ -131,6 +146,8 @@ module instruction_tb;
     $display("Instruction Testbench");
     $display("");
     dut.program_counter.pc_out = 32'h0; // Start at address 0
+
+    test_i_type();
     test_r_type();
     test_s_type();
 
