@@ -10,11 +10,9 @@ module instruction_memory (
 
   assign instruction = memory[address];
 
-  int i;
-
   always_ff @(posedge reset) begin
-    for (i = 0; i < 64; i = i + 1) begin
-      memory[i] = 32'h00000000;
+    for (int i = 0; i < 64; i++) begin
+      memory[i] <= 32'h00000000;
     end
   end
 endmodule

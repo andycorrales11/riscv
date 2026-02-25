@@ -16,11 +16,9 @@ module data_memory (
 
   assign read_data = (mem_read) ? memory[address] : 32'h00000000;
 
-  int i;
-
   always_ff @(posedge clk) begin
-    if (reset == 1'b1) begin
-      for(i = 0; i < 64; i = i + 1) memory[i] = 32'h0;
+    if (reset) begin
+      for(int i = 0; i < 64; i++) memory[i] <= 32'h0;
     end else if (mem_write == 1'b1) begin
       case (width)
         3'b000: memory[address] = {memory[address][31:8], write_data[7:0]}; // SB
