@@ -28,8 +28,11 @@ Extends 12-bit imm value into 32 bits. Currently takes different bits from the i
 ## Instruction Set
 RV32I : Instruction types include R, I, S, B, U, and J. Currently implemented R, I, and S instruction types, including: 
 - R: ADD, SUB, SLL, SLT, XOR, SRL, SRA, OR, AND
-- I: ADDI, XORI, ORI, ANDI, SLLI, SRLI, SRAI, SLTI
+- I: ADDI, XORI, ORI, ANDI, SLLI, SRLI, SRAI, SLTI, JALR
 - S: SB, SH, SW
+- B: BEQ, BNE, BLT, BGE, BLTU, BGEU
+- J: JAL
+- U: LUI, AUIPC
 ## Design Decisions
 
 ### Why single cycle?
