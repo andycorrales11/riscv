@@ -24,8 +24,8 @@ module instruction_tb;
     #1
     reset = 1'b0;
     for (int i = 0; i < instructions.size(); i++) begin
-      dut.instruction_memory.memory[i] = instructions[i];
-      $display("Loading instruction 0x%8h at address %0d", instructions[i], i);
+      dut.instruction_memory.memory[i*4] = instructions[i];
+      $display("Loading instruction 0x%8h at address %0d", instructions[i], i*4);
     end
     // Run for enough cycles to execute all instructions
     for (int cycle = 0; cycle < instructions.size() + 1; cycle++) begin
@@ -76,7 +76,7 @@ module instruction_tb;
   endtask
 
   task automatic test_i_type();
-
+    logic [31:0] instruction[] = new[1];
     // ADDI: x1 = x0(0) + 32 = 32 FAILS
     instruction[0] = encode_i_type(12'd32, 5'd0, F3_ADD_SUB, 5'd1); // ADDI x1, x0, 32
     run_program(instruction);
