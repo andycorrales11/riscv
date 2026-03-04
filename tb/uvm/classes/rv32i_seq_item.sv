@@ -17,6 +17,10 @@ class rv32i_seq_item extends uvm_sequence_item;
     };
   }
 
+  `uvm_object_utils_begin(rv32i_seq_item)
+    `uvm_field_int(opcode, UVM_ALL_ON)
+  `uvm_object_utils_end
+
   function new(string name = "rv32i_seq_item");
     super.new(name);
   endfunction
