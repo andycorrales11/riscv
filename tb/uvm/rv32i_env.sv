@@ -9,7 +9,7 @@ class rv32i_env extends uvm_env;
 
   virtual function build_phase(uvm_phase phase);
     super.build_phase(phase);
-    agent = new("agent", this);
+    agent = rv32i_agent::type_id::create("agent", this);
   endfunction
 
 endclass

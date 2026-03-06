@@ -14,8 +14,8 @@ class rv32i_agent extends uvm_agent;
   virtual function void build_phase (uvm_phase phase);
     super.build_phase(phase);
     if (is_active == UVM_ACTIVE) begin
-      sequencer = new("sequencer", this);
-      driver = new("driver", this);
+      sequencer = rv32i_sequencer::type_id::create("sequencer", this);
+      driver = rv32i_driver::type_id::create("driver", this);
     end
   endfunction
 

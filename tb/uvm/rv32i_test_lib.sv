@@ -10,7 +10,7 @@ class base_test extends uvm_test;
 
   virtual function build_phase(uvm_phase phase);
     super.build_phase(phase);
-    tb = new("tb",. this);
+    tb = rv32i_tb::type_id::create("tb", this);
   endfunction
 
   function void end_of_elaboration_phase(uvm_phase phase);

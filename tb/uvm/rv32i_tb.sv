@@ -9,7 +9,7 @@ class rv32i_tb extends uvm_env;
 
   virtual function build_phase(uvm_phase phase);
     super.build_phase(phase);
-    rv32i = new("rv32i", this);
+    rv32i = rv32i_env::type_id::create("rv32i", this);
   endfunction
 
 endclass

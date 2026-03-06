@@ -1,6 +1,7 @@
 package rv32i_pkg;
   import uvm_pkg::*;
   `include "uvm_macros.svh"
+  
   `include "rv32i_seq_item.sv"
   `include "itype_seq_item.sv"
   `include "stype_seq_item.sv"
@@ -9,7 +10,10 @@ package rv32i_pkg;
   `include "jtype_seq_item.sv"
   `include "utype_seq_item.sv"
   `include "rv32i_seqs.sv"    
+  `include "rv32i_sequencer.sv"
   `include "rv32i_driver.sv"
+  `include "rv32i_agent.sv"
+  `include "rv32i_env.sv"
 
   //op codes
   parameter logic [6:0] R_TYPE = 7'b0110011;
