@@ -1,7 +1,7 @@
 class rv32i_tb extends uvm_env;
-  `uvm_component_util(rv32i_tb)
+  `uvm_component_utils(rv32i_tb)
 
-  rv32i rv32i_env;
+  rv32i_env rv32i;
 
   function new(string name = "rv32i_tb", uvm_component parent);
     super.new(name, parent);
