@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module top (
+module cpu (
   input logic clk, 
   input logic reset
 );

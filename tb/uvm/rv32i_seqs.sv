@@ -3,6 +3,7 @@ class rv32i_r_seq extends uvm_sequence #(rtype_seq_item);
 
   function new(string name = "rv32i_r_seq");
     super.new(name);
+    set_automatic_phase_objection(1);          // apparently no longer need to manage objections in UVM 1.2? Keep any eye on this
   endfunction
 
   virtual task body();
@@ -20,6 +21,7 @@ class rv32i_i_seq extends uvm_sequence #(itype_seq_item);
 
   function new(string name = "rv32i_i_seq");
     super.new(name);
+    set_automatic_phase_objection(1);
   endfunction
 
   virtual task body();
@@ -35,6 +37,7 @@ class rv32i_s_seq extends uvm_sequence #(stype_seq_item);
 
   function new(string name = "rv32i_s_seq");
     super.new(name);
+    set_automatic_phase_objection(1);
   endfunction
 
   virtual task body();
