@@ -29,4 +29,8 @@ class rv32i_instr extends uvm_object;
     return $sformatf("opcode: %b", opcode);
   endfunction
 
+  virtual function logic [31:0] encode();
+    return {25'b0, opcode};
+  endfunction
+
 endclass

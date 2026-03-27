@@ -2,7 +2,7 @@ class utype_instr extends rv32i_instr;
   `uvm_object_utils(utype_instr)
 
   rand logic [19:0] imm;
-  rand logic [4:0] rd;
+  rand logic [4:0]  rd;
 
   `uvm_object_utils_begin(utype_instr)
     `uvm_field_int(imm, UVM_ALL_ON)
