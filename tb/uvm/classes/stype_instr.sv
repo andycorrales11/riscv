@@ -17,4 +17,8 @@ class stype_instr extends rv32i_instr;
     super.new(name);
   endfunction
 
+  function logic [31:0] encode();
+    return {imm[11:5], rs2, rs1, funct3, imm[4:0], opcode};
+  endfunction
+
 endclass

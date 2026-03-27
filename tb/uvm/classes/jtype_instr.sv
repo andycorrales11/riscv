@@ -13,4 +13,8 @@ class jtype_instr extends rv32i_instr;
     super.new(name);
   endfunction
 
+  function logic [31:0] encode();
+    return {imm[20], imm[10:1], imm[11], imm[19:12], rd, opcode};
+  endfunction
+
 endclass

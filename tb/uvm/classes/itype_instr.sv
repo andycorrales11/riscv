@@ -17,4 +17,8 @@ class itype_instr extends rv32i_instr;
     super.new(name);
   endfunction
 
+  function logic [31:0] encode();
+    return {imm, rs1, funct3, rd, opcode};
+  endfunction
+
 endclass

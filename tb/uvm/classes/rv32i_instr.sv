@@ -1,7 +1,7 @@
 class rv32i_instr extends uvm_object;
   `uvm_object_utils(rv32i_instr)
 
-  rand logic [6:0]  opcode;
+  logic [6:0]  opcode;
 
   constraint valid_opcode_c {
     opcode inside {
