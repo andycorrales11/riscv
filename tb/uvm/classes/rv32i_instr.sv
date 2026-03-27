@@ -1,5 +1,5 @@
-class rv32i_seq_item extends uvm_sequence_item;
-  `uvm_object_utils(rv32i_seq_item)
+class rv32i_instr extends uvm_object;
+  `uvm_object_utils(rv32i_instr)
 
   rand logic [6:0]  opcode;
 
@@ -17,11 +17,11 @@ class rv32i_seq_item extends uvm_sequence_item;
     };
   }
 
-  `uvm_object_utils_begin(rv32i_seq_item)
+  `uvm_object_utils_begin(rv32i_instr)
     `uvm_field_int(opcode, UVM_ALL_ON)
   `uvm_object_utils_end
 
-  function new(string name = "rv32i_seq_item");
+  function new(string name = "rv32i_instr");
     super.new(name);
   endfunction
 
