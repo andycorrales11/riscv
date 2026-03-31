@@ -13,6 +13,10 @@ class stype_instr extends rv32i_instr;
     `uvm_field_int(imm, UVM_ALL_ON)
   `uvm_object_utils_end
 
+  constraint valid_funct3_c {
+    funct3 inside {3'b000, 3'b001, 3'b010}; 
+  }
+
   function new(string name = "stype_instr");
     super.new(name);
   endfunction

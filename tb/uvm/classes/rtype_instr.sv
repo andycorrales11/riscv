@@ -15,6 +15,15 @@ class rtype_instr extends rv32i_instr;
     `uvm_field_int(rd, UVM_ALL_ON)
   `uvm_object_utils_end
 
+  constraint valid_funct3_c {
+    funct3 inside {3'b000, 3'b001, 3'b010, 3'b100, 3'b101, 3'b110, 3'b111};
+  }
+
+  constraint valid_funct7_c {
+    funct7 inside {7'b0000000, 7'b0100000};
+    funct7 == 7'b0100000 -> funct3 inside {3'b000, 3'b101};
+  }
+
   function new(string name = "rtype_instr");
     super.new(name);
   endfunction
