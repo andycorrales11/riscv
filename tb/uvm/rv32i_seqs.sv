@@ -44,6 +44,7 @@ class rv32i_r_seq extends uvm_sequence #(rv32i_seq_item);
     req.instrs     = new[preamble_size + num_instrs];
     req.num_cycles = preamble_size + num_instrs + 5;
 
+    // Generate ADDI instructions first
     foreach (src_regs[i]) begin
       init_instr        = itype_instr::type_id::create($sformatf("init_%0d", i));
       init_instr.opcode = I_TYPE;
@@ -54,6 +55,7 @@ class rv32i_r_seq extends uvm_sequence #(rv32i_seq_item);
       req.instrs[i]     = init_instr;
     end
 
+    // Then add R-type instructions
     for (int i = 0; i < num_instrs; i++)
       req.instrs[preamble_size + i] = r_instrs[i];
 

@@ -10,21 +10,21 @@ module top();
   parameter DATA_WIDTH = 32;
 
   logic clk;
-  logic if_reset;
-
-  logic [DATA_WIDTH-1:0] instruction;
-  logic                  endOfTest;
 
   rv32i_if if0(clk);
 
-  assign instruction = if0.instruction;
-  assign if_reset    = if0.reset;
-  assign if0.endOfTest = endOfTest;
-
   cpu inst_cpu (
     .clk(clk),
-    .reset(if_reset)
+    .reset(if0.reset)
   );
+
+  // Assign signals from DUt to interface
+  assign if0.pc         = inst_cpu.instruction_a;
+  assign if0.instr_exec = inst_cpu.instruction_out;
+  assign if0.reg_write  = inst_cpu.reg_write;
+  assign if0.rd         = inst_cpu.rd;
+  assign if0.wr_data_rf = inst_cpu.write_data;
+  assign if0.opcode     = inst_cpu.opcode;
 
   initial begin
     clk = 1'b0;
