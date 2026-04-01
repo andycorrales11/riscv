@@ -7,16 +7,21 @@ interface rv32i_if (input logic clk);
 
   parameter int DATA_WIDTH = 32;
 
-  // input
+  // driver signals
   logic endOfTest;
+  logic reset;
 
-  // outputs
-  logic [DATA_WIDTH-1:0] instruction;
-  logic                  reset;
+  // monitor signals
+  logic [31:0] pc;
+  logic [31:0] instr_exec;
+  logic        reg_write;
+  logic [4:0]  rd;
+  logic [31:0] wr_data_rf;
+  logic [6:0]  opcode;
 
   initial begin
-    reset       = 1'b1;
-    instruction = 32'b0;
+    reset      = 1'b1;
+    endOfTest  = 1'b0;
   end
 
 endinterface
