@@ -13,6 +13,7 @@
 - *SystemVerilog Accelerated Verification using UVM v1.2.6* Cadence Training
 - *Verilog Style Guide* - https://github.com/lowrisc/style-guides/blob/master/VerilogCodingStyle.md
 - *RISC-V Instruction Reference* - https://www.cs.sfu.ca/~ashriram/Courses/CS295/assets/notebooks/RISCV/RISCV_CARD.pdf
+- *UVM Cookbook* - Siemens Verification Academy
 - I will keep adding more as I find them
 
 [Architecture](architecture.md)
