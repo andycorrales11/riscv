@@ -6,6 +6,7 @@ class rv32i_monitor_txn extends uvm_sequence_item;
   logic [4:0]  rd;
   logic [31:0] wr_data;
   logic        reg_write;
+  logic        reset;
 
   `uvm_object_utils_begin(rv32i_monitor_txn)
     `uvm_field_int(pc,        UVM_ALL_ON)
@@ -13,6 +14,7 @@ class rv32i_monitor_txn extends uvm_sequence_item;
     `uvm_field_int(rd,        UVM_ALL_ON)
     `uvm_field_int(wr_data,   UVM_ALL_ON)
     `uvm_field_int(reg_write, UVM_ALL_ON)
+    `uvm_field_int(reset,     UVM_ALL_ON)
   `uvm_object_utils_end
 
   function new(string name = "rv32i_monitor_txn");

@@ -27,6 +27,7 @@ class rv32i_monitor extends uvm_monitor;
       txn.reg_write = vif.reg_write;
       txn.rd        = vif.rd;
       txn.wr_data   = vif.wr_data_rf;
+      txn.reset     = vif.reset;
       ap.write(txn);
     end
   endtask
