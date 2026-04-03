@@ -16,9 +16,17 @@ class rv32i_ref_model extends uvm_object;
     for (int i = 0; i < 64; i++) dmem[i] = 0;
   endfunction
 
-  function logic step(input  logic [31:0] instr, output logic [4:0]  rd, output logic [31:0] wr_data);
-    rd      = instr[11:7];
-    wr_data = 32'b0;
+  function logic step(input  logic [31:0] instr,
+                     output logic [4:0]  rd,
+                     output logic [31:0] wr_data,
+                     output logic        pred_mem_write,
+                     output logic [31:0] pred_mem_addr,
+                     output logic [31:0] pred_mem_wdata);
+    rd             = instr[11:7];
+    wr_data        = 32'b0;
+    pred_mem_write = 1'b0;
+    pred_mem_addr  = 32'b0;
+    pred_mem_wdata = 32'b0;
 
     case (instr[6:0])
       // R-Type
@@ -87,6 +95,9 @@ class rv32i_ref_model extends uvm_object;
         logic [31:0] addr = rf[instr[19:15]] + imm;
         logic [31:0] num2 = rf[instr[24:20]];
         int          widx = int'(addr >> 2);
+        pred_mem_write = 1'b1;
+        pred_mem_addr  = addr;
+        pred_mem_wdata = num2;
         case (instr[14:12])
           3'b000: dmem[widx] = {dmem[widx][31:8],  num2[7:0]};   // SB
           3'b001: dmem[widx] = {dmem[widx][31:16], num2[15:0]};  // SH
