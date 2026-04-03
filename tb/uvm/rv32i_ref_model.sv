@@ -3,7 +3,6 @@ class rv32i_ref_model extends uvm_object;
 
   logic [31:0] rf   [32];
   logic [31:0] dmem [64];
-  logic [31:0] imem [64];
   logic [31:0] pc;
 
   function new(string name = "rv32i_ref_model");
@@ -13,102 +12,155 @@ class rv32i_ref_model extends uvm_object;
 
   function void reset();
     pc = 0;
-    for (int i = 0; i < 32; i++) rf[i] = 0;
-    for (int i = 0; i < 64; i++) begin
-      dmem[i] = 0;
-      imem[i] = 32'h00000013;
-    end
+    for (int i = 0; i < 32; i++) rf[i]   = 0;
+    for (int i = 0; i < 64; i++) dmem[i] = 0;
   endfunction
 
-  function void load_program(rv32i_seq_item item);
-    for (int i = 0; i < item.instrs.size(); i++) imem[i] = item.instrs[i].encode();
-  endfunction
-
-  function int step(output logic [4:0] rd, output logic [31:0] wr_data);
-    logic [31:0] instr;
-    instr = imem[pc >> 2];
+  function logic step(input  logic [31:0] instr, output logic [4:0]  rd, output logic [31:0] wr_data);
+    rd      = instr[11:7];
+    wr_data = 32'b0;
 
     case (instr[6:0])
-      7'b0110011: begin // R-type
-        logic [9:0] funct = {instr[31:25], instr[14:12]};
-        logic [4:0] rs1 = instr[19:15];
-        logic [4:0] rs2 = instr[24:20];
-        rd  = instr[11:7];
-        logic [31:0] num1 = rf[rs1];
-        logic [31:0] num2 = rf[rs2];
-        case (funct)
-          10'b0000000000: rf[rd] = num1 + num2; // ADD
-          10'b0100000000: rf[rd] = num1 - num2; // SUB
-          10'b0000000001: rf[rd] = num1 << num2[4:0]; // SLL
-          10'b0000000010: rf[rd] = ($signed(num1) < $signed(num2)) ? 32'h1 : 32'h0; // SLT
-          // 10'b0000000011: rf[rd] = SLTU - (NOT IMPLEMENTED)
-          10'b0000000100: rf[rd] = num1 ^ num2; // XOR
-          10'b0000000101: rf[rd] = num1 >> num2[4:0]; // SRL
-          10'b0100000101: rf[rd] = $signed(num1) >>> num2[4:0]; // SRA
-          10'b0000000110: rf[rd] = num1 | num2; // OR
-          10'b0000000111: rf[rd] = num1 & num2; // AND
-          default: begin
-            $display("Unknown R-type instruction at PC = %h", pc);
-          end
+      // R-Type
+      7'b0110011: begin
+        logic [31:0] num1 = rf[instr[19:15]];
+        logic [31:0] num2 = rf[instr[24:20]];
+        case ({instr[31:25], instr[14:12]})
+          10'b0000000_000: wr_data = num1 + num2;                               // ADD
+          10'b0100000_000: wr_data = num1 - num2;                               // SUB
+          10'b0000000_001: wr_data = num1 << num2[4:0];                         // SLL
+          10'b0000000_010: wr_data = ($signed(num1) < $signed(num2)) ? 1 : 0;  // SLT
+          10'b0000000_011: wr_data = (num1 < num2) ? 1 : 0;                    // SLTU
+          10'b0000000_100: wr_data = num1 ^ num2;                               // XOR
+          10'b0000000_101: wr_data = num1 >> num2[4:0];                         // SRL
+          10'b0100000_101: wr_data = $signed(num1) >>> num2[4:0];               // SRA
+          10'b0000000_110: wr_data = num1 | num2;                               // OR
+          10'b0000000_111: wr_data = num1 & num2;                               // AND
+          default: `uvm_error("REF_MODEL", $sformatf("Unknown R-type funct at PC=%0h", pc))
         endcase
+        rf[rd] = wr_data;
+        pc = pc + 4;
+        return 1;
+      end
 
-        pc += 4;
-        wr_data = 0;
+      // I-Type arithmetic
+      7'b0010011: begin
+        logic [31:0] num1 = rf[instr[19:15]];
+        logic [31:0] imm  = {{20{instr[31]}}, instr[31:20]};
+        case (instr[14:12])
+          3'b000: wr_data = num1 + imm;                                         // ADDI
+          3'b001: wr_data = num1 << instr[24:20];                               // SLLI
+          3'b010: wr_data = ($signed(num1) < $signed(imm)) ? 1 : 0;            // SLTI
+          3'b011: wr_data = (num1 < imm) ? 1 : 0;                              // SLTIU
+          3'b100: wr_data = num1 ^ imm;                                         // XORI
+          3'b101: wr_data = instr[30] ? ($signed(num1) >>> instr[24:20])        // SRAI
+                                      : (num1 >> instr[24:20]);                 // SRLI
+          3'b110: wr_data = num1 | imm;                                         // ORI
+          3'b111: wr_data = num1 & imm;                                         // ANDI
+        endcase
+        rf[rd] = wr_data;
+        pc = pc + 4;
+        return 1;
+      end
+
+      // I-Type load
+      7'b0000011: begin
+        logic [31:0] imm  = {{20{instr[31]}}, instr[31:20]};
+        logic [31:0] addr = rf[instr[19:15]] + imm;
+        logic [31:0] word = dmem[addr >> 2];
+        case (instr[14:12])
+          3'b000: wr_data = {{24{word[7]}},  word[7:0]};   // LB
+          3'b001: wr_data = {{16{word[15]}}, word[15:0]};  // LH
+          3'b010: wr_data = word;                           // LW
+          3'b100: wr_data = {24'b0, word[7:0]};            // LBU
+          3'b101: wr_data = {16'b0, word[15:0]};           // LHU
+          default: `uvm_error("REF_MODEL", $sformatf("Unknown load funct3 at PC=%0h", pc))
+        endcase
+        rf[rd] = wr_data;
+        pc = pc + 4;
+        return 1;
+      end
+
+      // S-Type store
+      7'b0100011: begin
+        logic [31:0] imm  = {{20{instr[31]}}, instr[31:25], instr[11:7]};
+        logic [31:0] addr = rf[instr[19:15]] + imm;
+        logic [31:0] num2 = rf[instr[24:20]];
+        int          widx = int'(addr >> 2);
+        case (instr[14:12])
+          3'b000: dmem[widx] = {dmem[widx][31:8],  num2[7:0]};   // SB
+          3'b001: dmem[widx] = {dmem[widx][31:16], num2[15:0]};  // SH
+          3'b010: dmem[widx] = num2;                              // SW
+          default: `uvm_error("REF_MODEL", $sformatf("Unknown store funct3 at PC=%0h", pc))
+        endcase
+        pc = pc + 4;
+        rd = 5'b0;
         return 0;
       end
-      7'b0010011: begin // I-type
-        logic [2:0] funct3 = instr[14:12];
-        logic [4:0] rs1 = instr[19:15];
-        rd  = instr[11:7];
-        logic [31:0] num1 = rf[rs1];
+
+      // B-type
+      7'b1100011: begin
+        logic [31:0] num1 = rf[instr[19:15]];
+        logic [31:0] num2 = rf[instr[24:20]];
+        logic [31:0] imm  = {{19{instr[31]}}, instr[31], instr[7], instr[30:25], instr[11:8], 1'b0};
+        logic branch_taken;
+        case (instr[14:12])
+          3'b000: branch_taken = (num1 == num2);                   // BEQ
+          3'b001: branch_taken = (num1 != num2);                   // BNE
+          3'b100: branch_taken = ($signed(num1) < $signed(num2));  // BLT
+          3'b101: branch_taken = ($signed(num1) >= $signed(num2)); // BGE
+          3'b110: branch_taken = (num1 < num2);                    // BLTU
+          3'b111: branch_taken = (num1 >= num2);                   // BGEU
+          default: branch_taken = 1'b0;
+        endcase
+        pc = branch_taken ? (pc + imm) : (pc + 4);
+        rd = 5'b0;
+        return 0;
+      end
+
+      // LUI
+      7'b0110111: begin
+        wr_data = {instr[31:12], 12'b0};
+        rf[rd]  = wr_data;
+        pc = pc + 4;
+        return 1;
+      end
+
+      // AUIPC
+      7'b0010111: begin
+        wr_data = pc + {instr[31:12], 12'b0};
+        rf[rd]  = wr_data;
+        pc = pc + 4;
+        return 1;
+      end
+
+      // JAL
+      7'b1101111: begin
+        logic [31:0] imm = {{11{instr[31]}}, instr[31], instr[19:12],  instr[20], instr[30:21], 1'b0};
+        wr_data = pc + 4;
+        rf[rd]  = wr_data;
+        pc = pc + imm;
+        return 1;
+      end
+
+      // JALR
+      7'b1100111: begin
         logic [31:0] imm = {{20{instr[31]}}, instr[31:20]};
-        case (funct3)
-          3'b000: rf[rd] = num1 + imm; // ADDI
-          3'b010: rf[rd] = ($signed(num1) < $signed(imm)) ? 32'h1 : 32'h0; // SLTI
-          3'b100: rf[rd] = num1 ^ imm; // XORI
-          3'b110: rf[rd] = num1 | imm; // ORI
-          3'b111: rf[rd] = num1 & imm; // ANDI
-          3'b001: rf[rd] = num1 << imm[4:0]; // SLLI
-          3'b101: begin
-            if (imm[11:5] == 7'b0000000) rf[rd] = num1 >> imm[4:0]; // SRLI
-            else if (imm[11:5] == 7'b0100000) rf[rd] = $signed(num1) >>> imm[4:0]; // SRAI
-            else begin
-              $display("Unknown I-type shift instruction at PC = %h", pc);     
-            end
-          end
-        endcase 
-        pc += 4;
-        wr_data = 0;
+        wr_data = pc + 4;
+        rf[rd]  = wr_data;
+        pc = (rf[instr[19:15]] + imm) & ~32'b1;
+        return 1;
+      end
+
+      default: begin
+        `uvm_error("REF_MODEL",
+          $sformatf("Unknown opcode %0h at PC=%0h", instr[6:0], pc))
+        pc = pc + 4;
+        rd = 5'b0;
         return 0;
       end
-      7'b0000011: begin // I-Type Load
-        
-      end
-      7'b0100011: begin // S-Type
-        
-      end
-      7'b1100011: begin // B-Type
-        
-      end
-      7'b1101111: begin //JAL
 
-      end
-      7'b1100111: begin // JALR
-
-      end
-      7'b0110111: begin // LUI
-
-      end
-      7'b0010111: begin //AUIPC
-
-      end
-      default: begin
-        $display("Unknown instruction at PC = %h", pc);
-      end
     endcase
-    rd = 5'b0;
-    wr_data = 32'b0;
-    return 0; 
   endfunction
 
 endclass

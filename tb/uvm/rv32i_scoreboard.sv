@@ -1,39 +1,74 @@
 class rv32i_scoreboard extends uvm_scoreboard;
   `uvm_component_utils(rv32i_scoreboard)
 
-  `uvm_analysis_imp_decl(_driver)
-  `uvm_analysis_imp_decl(_monitor)
+  uvm_analysis_imp #(rv32i_monitor_txn, rv32i_scoreboard) imp;
 
-  `uvm_analysis_imp_driver #(rv32i_seq_item,     rv32i_scoreboard) driver_imp;
-  `uvm_analysis_imp_monitor #(rv32i_monitor_txn, rv32i_scoreboard) monitor_imp;
   rv32i_ref_model ref_model;
 
+  int pass_count;
+  int fail_count;
 
-  function new (string name, uvm_component parent);
+  logic prev_reset;
+
+  function new(string name, uvm_component parent);
     super.new(name, parent);
-    imp = new("imp", this);
   endfunction
 
-  function void write_driver(input rv32i_seq_item item);
-    ref_model.load_program(item);
+  virtual function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    imp       = new("imp", this);
+    ref_model = rv32i_ref_model::type_id::create("ref_model");
+    prev_reset = 1'b1;
   endfunction
 
-  function void write_monitor(input rv32i_monitor_txn txn);
-    logic [4:0] predicted_rd;
+  function void write(input rv32i_monitor_txn txn);
+    logic [4:0]  predicted_rd;
     logic [31:0] predicted_val;
+    logic        predicted_reg_write;
+
+    // Falling edge of reset: CPU is about to start executing instructions, so reset the reference model
+    if (prev_reset && !txn.reset)
+      ref_model.reset();
+    prev_reset = txn.reset;
 
     if (txn.reset) return;
 
-    ref_model.step(predicted_rd, predicted_val);
+    // Step the model with the exact instruction the monitor observed
+    predicted_reg_write = ref_model.step(txn.instr, predicted_rd, predicted_val);
 
+    // Check if register was written to
+    if (txn.reg_write !== predicted_reg_write) begin
+      `uvm_error(get_type_name(),
+        $sformatf("reg_write mismatch at PC=%0h instr=%0h: model=%0b DUT=%0b",
+                  txn.pc, txn.instr, predicted_reg_write, txn.reg_write))
+      fail_count++;
+      return;
+    end
+
+    // Check destination register and value
     if (txn.reg_write) begin
       if (predicted_rd !== txn.rd || predicted_val !== txn.wr_data) begin
-        `uvm_error(get_type_name(), $sformatf("Mismatch at PC = %h: expected rd = %0d, wr_data = %h; got rd = %0d, wr_data = %h",
-          txn.pc, predicted_rd, predicted_val, txn.rd, txn.wr_data))
+        `uvm_error(get_type_name(),
+          $sformatf("Data mismatch at PC=%0h: expected rd=x%0d val=%0h  got rd=x%0d val=%0h",
+                    txn.pc, predicted_rd, predicted_val, txn.rd, txn.wr_data))
+        fail_count++;
       end else begin
-        `uvm_info(get_type_name(), $sformatf("Match at PC = %h: rd = %0d, wr_data = %h", txn.pc, txn.rd, txn.wr_data), UVM_LOW)
+        `uvm_info(get_type_name(),
+          $sformatf("PASS PC=%0h rd=x%0d val=%0h", txn.pc, txn.rd, txn.wr_data),
+          UVM_HIGH)
+        pass_count++;
       end
     end
+  endfunction
+
+  virtual function void report_phase(uvm_phase phase);
+    `uvm_info(get_type_name(),
+      $sformatf("Scoreboard results: %0d passed, %0d failed",
+                pass_count, fail_count), UVM_NONE)
+    if (fail_count > 0)
+      `uvm_error(get_type_name(), "TEST FAILED")
+    else
+      `uvm_info(get_type_name(), "TEST PASSED", UVM_NONE)
   endfunction
 
 endclass
