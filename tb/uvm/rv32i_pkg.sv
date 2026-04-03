@@ -17,7 +17,6 @@ package rv32i_pkg;
   `include "rv32i_monitor.sv"
   `include "rv32i_ref_model.sv"
   `include "rv32i_scoreboard.sv"
-  `include "rv32i_coverage.sv"
   `include "rv32i_agent.sv"
   `include "rv32i_env.sv"
 
