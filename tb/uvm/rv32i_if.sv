@@ -18,6 +18,10 @@ interface rv32i_if (input logic clk);
   logic [4:0]  rd;
   logic [31:0] wr_data_rf;
   logic [6:0]  opcode;
+  logic        mem_write;
+  logic [31:0] mem_addr;
+  logic [31:0] mem_wdata;
+  logic [31:0] pc_next;
 
   initial begin
     reset      = 1'b1;

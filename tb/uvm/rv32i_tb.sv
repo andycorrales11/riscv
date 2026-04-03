@@ -16,8 +16,6 @@ class rv32i_tb extends uvm_env;
 
   virtual function void connect_phase(uvm_phase phase);
     rv32i.agent.monitor.ap.connect(scoreboard.imp);
-    // FINISH ME: ?
-
   endfunction
 
 endclass

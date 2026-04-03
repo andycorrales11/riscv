@@ -25,6 +25,10 @@ module top();
   assign if0.rd         = inst_cpu.rd;
   assign if0.wr_data_rf = inst_cpu.write_data;
   assign if0.opcode     = inst_cpu.opcode;
+  assign if0.mem_write  = inst_cpu.mem_write;
+  assign if0.mem_addr   = inst_cpu.alu_result;
+  assign if0.mem_wdata  = inst_cpu.read_data2;
+  assign if0.pc_next    = inst_cpu.pc_next;
 
   initial begin
     clk = 1'b0;

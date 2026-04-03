@@ -5,8 +5,4 @@ class rv32i_sequencer extends uvm_sequencer #(rv32i_seq_item);
     super.new(name, parent);
   endfunction
 
-  task body();
-
-  endtask
-
 endclass
