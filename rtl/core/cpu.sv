@@ -1,8 +1,11 @@
 `timescale 1ns/1ps
 
 module cpu (
-  input logic clk, 
-  input logic reset
+  input logic        clk,
+  input logic        reset,
+  input logic        inst_load_en,
+  input logic [5:0]  inst_load_addr,
+  input logic [31:0] inst_load_data
 );
 
   logic [31:0] instruction_a,
@@ -49,7 +52,10 @@ module cpu (
   );
 
   instruction_memory instruction_memory(
-    .reset(reset),
+    .clk(clk),
+    .load_en(inst_load_en),
+    .load_addr(inst_load_addr),
+    .load_data(inst_load_data),
     .address(instruction_a),
     .instruction(instruction_out)
   );

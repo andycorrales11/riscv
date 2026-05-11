@@ -6,6 +6,7 @@ MEM_DIR = rtl/memory
 COM_DIR = rtl/common
 TB_DIR = tb/basic
 PKG_DIR = tb/packages
+VTB_DIR = tb/verilator
 
 
 # ALU Unit Test
@@ -138,4 +139,47 @@ help:
 	@echo "  make clean    - Remove build files"
 	@echo "  make help     - Show this message"
 
-.PHONY: all compile sim waves test clean help
+# --------- Verilator UVM-style port (no UVM, no randomize) ---------
+
+RTL_FULL = \
+  $(COM_DIR)/mux2.sv \
+  $(COM_DIR)/mux3.sv \
+  $(MEM_DIR)/instruction_memory.sv \
+  $(MEM_DIR)/data_memory.sv \
+  $(RTL_DIR)/alu.sv \
+  $(RTL_DIR)/branch_unit.sv \
+  $(RTL_DIR)/controller.sv \
+  $(RTL_DIR)/instruction_decoder.sv \
+  $(RTL_DIR)/program_counter.sv \
+  $(RTL_DIR)/register_file.sv \
+  $(RTL_DIR)/sign_extender.sv \
+  $(RTL_DIR)/cpu.sv
+
+UVM_TB = \
+  $(VTB_DIR)/rv32i_pkg.sv \
+  $(VTB_DIR)/rv32i_if.sv \
+  $(VTB_DIR)/top.sv
+
+UVM_BUILD_DIR = sim/uvm_obj
+TOP_UVM = top
+TEST ?= r_test
+
+compile_uvm:
+	@echo "Compiling Verilator-port UVM testbench..."
+	verilator $(VFLAGS) \
+		-I$(VTB_DIR) \
+		$(RTL_FULL) \
+		$(UVM_TB) \
+		$(abspath sim/uvm_tb_wrapper.cpp) \
+		--top-module $(TOP_UVM) \
+		--timing \
+		-Wno-WIDTH -Wno-CASEINCOMPLETE -Wno-CASEOVERLAP -Wno-UNOPTFLAT -Wno-LATCH \
+		-Mdir $(UVM_BUILD_DIR)
+	@echo "UVM-port build complete!"
+
+sim_uvm: compile_uvm
+	@echo "Running UVM-port simulation (TEST=$(TEST))..."
+	./$(UVM_BUILD_DIR)/V$(TOP_UVM) +TEST=$(TEST)
+	@echo "Simulation complete!"
+
+.PHONY: all compile sim waves test clean help compile_uvm sim_uvm
