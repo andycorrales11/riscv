@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 
 module alu (
-  input  logic [9:0]  opcode,
+  input  logic [3:0]  alu_op,
   input  logic [31:0] num1,
   input  logic [31:0] num2,
   input  logic        store_op, // 1 for store instructions, 0 for ALU operations
@@ -9,22 +9,25 @@ module alu (
   output logic        zero
 );
 
+  // alu_op encoding (must match controller.sv):
+  //   0000 ADD   0001 SUB   0010 SLL   0011 SLT
+  //   0100 XOR   0101 SRL   0110 SRA   0111 OR    1000 AND
+
   always_comb begin
     if (store_op) begin
       // For store instructions, the ALU calculates the effective address
       result = num1 + num2; // base address + offset
     end else begin
-      case (opcode)
-        10'b0000000000: result = num1 + num2; // ADD - funct3 = 0x0, funct7 = 0x00
-        10'b0100000000: result = num1 - num2; // SUB - funct3 = 0x0, funct7 = 0x20
-        10'b0000000001: result = num1 << num2[4:0]; // SLL - funct3 = 0x1, funct7 = 0x00
-        10'b0000000010: result = $signed(num1) < $signed(num2) ? 32'h1 : 32'h0; // SLT - funct3 = 0x2, funct7 = 0x00
-        // 10'b0000000011: result = SLTU - funct3 = 0x3, funct7 = 0x00 (NOT IMPLEMENTED)
-        10'b0000000100: result = num1 ^ num2; // XOR - funct3 = 0x4, funct7 = 0x00
-        10'b0000000101: result = num1 >> num2[4:0]; // SRL  - funct3 = 0x5, funct7 = 0x00
-        10'b0100000101: result = $signed(num1) >>> num2[4:0]; // SRA - funct3 = 0x5, funct7 = 0x20
-        10'b0000000110: result = num1 | num2; // OR  - funct3 = 0x6, funct7 = 0x00
-        10'b0000000111: result = num1 & num2; // AND - funct3 = 0x7, funct7 = 0x00
+      case (alu_op)
+        4'b0000: result = num1 + num2;                                          // ADD
+        4'b0001: result = num1 - num2;                                          // SUB
+        4'b0010: result = num1 << num2[4:0];                                    // SLL
+        4'b0011: result = $signed(num1) < $signed(num2) ? 32'h1 : 32'h0;        // SLT
+        4'b0100: result = num1 ^ num2;                                          // XOR
+        4'b0101: result = num1 >> num2[4:0];                                    // SRL
+        4'b0110: result = $signed(num1) >>> num2[4:0];                          // SRA
+        4'b0111: result = num1 | num2;                                          // OR
+        4'b1000: result = num1 & num2;                                          // AND
         default: result = 32'h0;
       endcase
     end

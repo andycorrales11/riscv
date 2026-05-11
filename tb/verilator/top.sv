@@ -75,7 +75,7 @@ module top;
       init_instr.funct3 = 3'b000;
       init_instr.rs1    = 5'b0;
       init_instr.rd     = src_regs[i];
-      init_instr.imm    = 12'($urandom_range(1, 31));
+      init_instr.imm    = 12'($urandom_range(1, 255));
       program_mem[idx]  = init_instr.encode();
       idx++;
     end
@@ -96,7 +96,7 @@ module top;
       instr        = new();
       instr.opcode = I_TYPE;
       void'(instr.do_randomize());
-      instr.imm    = 12'($urandom_range(0, 31));
+      instr.imm    = 12'($urandom_range(0, 2047));
       program_mem[i] = instr.encode();
     end
     program_size = n;
@@ -128,7 +128,7 @@ module top;
       init_instr.funct3 = 3'b000;
       init_instr.rs1    = 5'b0;
       init_instr.rd     = src_regs[i];
-      init_instr.imm    = 12'($urandom_range(1, 31));
+      init_instr.imm    = 12'($urandom_range(1, 255));
       program_mem[idx]  = init_instr.encode();
       idx++;
     end

@@ -32,6 +32,7 @@ module cpu (
 
   logic [2:0]  alu_src;
   logic [1:0]  result_src;
+  logic [3:0]  alu_op;
 
   logic [6:0]  opcode;
   logic [4:0]  rd, rs1, rs2;
@@ -84,6 +85,8 @@ module cpu (
 
   controller controller(
     .opcode(opcode),
+    .funct3(funct3),
+    .funct7(funct7),
     .branch(branch),
     .mem_read(mem_read),
     .alu_src(alu_src),
@@ -91,11 +94,12 @@ module cpu (
     .result_src(result_src),
     .jal(jal),
     .jalr(jalr),
-    .reg_write(reg_write)
+    .reg_write(reg_write),
+    .alu_op(alu_op)
   );
 
   alu alu(
-    .opcode({funct7, funct3}),
+    .alu_op(alu_op),
     .num1(num1),
     .num2(num2),
     .store_op(mem_write),
