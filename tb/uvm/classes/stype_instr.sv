@@ -1,5 +1,4 @@
 class stype_instr extends rv32i_instr;
-  `uvm_object_utils(stype_instr)
 
   rand logic [4:0] rs1;
   rand logic [4:0] rs2;

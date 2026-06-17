@@ -20,7 +20,11 @@ class rv32i_monitor extends uvm_monitor;
     rv32i_monitor_txn txn;
     `uvm_info(get_type_name(), "Starting run phase", UVM_LOW)
     forever begin
-      @(posedge vif.clk);
+      // Sample mid-cycle (negedge): on this single-cycle core the registered PC
+      // updates on posedge, so a posedge sample reads the post-update PC (one
+      // instruction ahead). Negedge gives a stable snapshot where pc/instr/retire
+      // signals all belong to the instruction executing this cycle.
+      @(negedge vif.clk);
       txn           = rv32i_monitor_txn::type_id::create("txn");
       txn.pc        = vif.pc;
       txn.instr     = vif.instr_exec;

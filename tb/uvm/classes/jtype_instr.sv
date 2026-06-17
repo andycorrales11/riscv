@@ -1,5 +1,4 @@
 class jtype_instr extends rv32i_instr;
-  `uvm_object_utils(jtype_instr)
 
   logic      [19:0] imm;
   rand logic [4:0]  rd;

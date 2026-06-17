@@ -1,5 +1,4 @@
 class rv32i_instr extends uvm_object;
-  `uvm_object_utils(rv32i_instr)
 
   logic [6:0]  opcode;
 

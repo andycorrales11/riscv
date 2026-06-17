@@ -1,5 +1,4 @@
 class rv32i_monitor_txn extends uvm_sequence_item;
-  `uvm_object_utils(rv32i_monitor_txn)
 
   logic [31:0] pc;
   logic [31:0] instr;

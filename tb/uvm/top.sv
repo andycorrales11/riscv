@@ -18,6 +18,12 @@ module top();
     .reset(if0.reset)
   );
 
+  // TB-side backdoor: load the CPU's instruction memory from the interface.
+  // Replaces uvm_hdl_deposit (which needs UVM DPI, unavailable under UVM_NO_DPI).
+  always @(posedge clk)
+    if (if0.load_en)
+      inst_cpu.instruction_memory.memory[if0.load_addr] <= if0.load_data;
+
   // Assign signals from DUt to interface
   assign if0.pc         = inst_cpu.instruction_a;
   assign if0.instr_exec = inst_cpu.instruction_out;
