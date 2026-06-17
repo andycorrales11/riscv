@@ -1,5 +1,4 @@
 class rv32i_seq_item extends uvm_sequence_item;
-  `uvm_object_utils(rv32i_seq_item)
 
   rv32i_instr instrs [];
   int         num_cycles;

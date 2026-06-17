@@ -1,8 +1,6 @@
 class rv32i_agent extends uvm_agent;
   
-  `uvm_component_utils_begin(rv32i_agent)
-    `uvm_field_enum(uvm_active_passive_enum, active_passive, UVM_ALL_ON)
-  `uvm_component_utils_end
+  `uvm_component_utils(rv32i_agent)
 
   rv32i_sequencer sequencer;
   rv32i_driver    driver;

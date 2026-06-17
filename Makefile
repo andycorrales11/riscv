@@ -130,7 +130,7 @@ compile_uvm:
 	  echo "  make compile_uvm UVM_HOME=/path/to/1800.2-2017-1.0/src"; \
 	  exit 1; }
 	@echo "Compiling UVM testbench (needs UVM-capable Verilator master)..."
-	verilator --binary --timing -Wno-fatal \
+	verilator --binary --timing -Wno-fatal --build-jobs 4 \
 		+incdir+$(UVM_HOME) +define+UVM_NO_DPI \
 		+incdir+$(UVM_DIR) +incdir+$(UVM_DIR)/classes \
 		$(UVM_HOME)/uvm_pkg.sv \
