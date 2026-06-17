@@ -44,8 +44,11 @@ class rv32i_driver extends uvm_driver #(rv32i_seq_item);
     @(negedge vif.clk);
     vif.load_en = 1'b0;
 
+    // Deassert reset just AFTER the posedge so the program_counter latches
+    // reset=1 at that edge (PC stays 0). This gives one clean reset=0/pc=0
+    // cycle that the negedge monitor can observe before PC advances to 4.
     @(posedge vif.clk);
-    vif.reset = 1'b0;
+    #1 vif.reset = 1'b0;
 
     repeat (item.num_cycles) @(posedge vif.clk);
 
