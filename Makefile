@@ -108,6 +108,13 @@ UVM_BUILD_DIR = sim/obj_dir_uvm
 TOP_UVM = top
 UVM_TEST ?= r_test
 
+# Tool locations (override if installed elsewhere). The UVM-capable Verilator is
+# needed to compile; z3 is needed at run time for SystemVerilog constraint solving
+# (randomize()). Both are prepended to PATH for the UVM targets.
+VERILATOR_BIN ?= /home/andy/tools/verilator-master/bin
+Z3_BIN        ?= /home/andy/tools/z3venv/bin
+UVM_PATH       = $(VERILATOR_BIN):$(Z3_BIN):$$PATH
+
 # All RTL needed by the cpu the UVM top instantiates
 UVM_RTL = \
   $(COM_DIR)/mux2.sv \
@@ -130,7 +137,7 @@ compile_uvm:
 	  echo "  make compile_uvm UVM_HOME=/path/to/1800.2-2017-1.0/src"; \
 	  exit 1; }
 	@echo "Compiling UVM testbench (needs UVM-capable Verilator master)..."
-	verilator --binary --timing -Wno-fatal --build-jobs 4 \
+	PATH="$(UVM_PATH)" verilator --binary --timing -Wno-fatal --build-jobs 4 \
 		+incdir+$(UVM_HOME) +define+UVM_NO_DPI \
 		+incdir+$(UVM_DIR) +incdir+$(UVM_DIR)/classes \
 		$(UVM_HOME)/uvm_pkg.sv \
@@ -144,7 +151,7 @@ compile_uvm:
 
 sim_uvm: compile_uvm
 	@echo "Running UVM simulation (UVM_TEST=$(UVM_TEST))..."
-	./$(UVM_BUILD_DIR)/V$(TOP_UVM) +UVM_TESTNAME=$(UVM_TEST)
+	PATH="$(UVM_PATH)" ./$(UVM_BUILD_DIR)/V$(TOP_UVM) +UVM_TESTNAME=$(UVM_TEST)
 	@echo "Simulation complete!"
 
 # Run simulation
