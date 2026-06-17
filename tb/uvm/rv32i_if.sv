@@ -11,6 +11,11 @@ interface rv32i_if (input logic clk);
   logic endOfTest;
   logic reset;
 
+  // backdoor instruction-load signals (driven by driver, consumed in top.sv)
+  logic        load_en;
+  logic [5:0]  load_addr;
+  logic [31:0] load_data;
+
   // monitor signals
   logic [31:0] pc;
   logic [31:0] instr_exec;
@@ -26,6 +31,7 @@ interface rv32i_if (input logic clk);
   initial begin
     reset      = 1'b1;
     endOfTest  = 1'b0;
+    load_en    = 1'b0;
   end
 
   covergroup instr_cg @(posedge clk);

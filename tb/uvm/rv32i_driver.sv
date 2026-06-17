@@ -3,7 +3,6 @@ class rv32i_driver extends uvm_driver #(rv32i_seq_item);
 
   virtual rv32i_if vif;
 
-  localparam string INST_MEM = "top.inst_cpu.instruction_memory.memory";
   localparam int    INST_MEM_S = 64;
   localparam logic [31:0] NOP = 32'h00000013; // ADDI x0, x0, 0
 
@@ -27,24 +26,23 @@ class rv32i_driver extends uvm_driver #(rv32i_seq_item);
   endtask
 
   virtual task send_to_dut(rv32i_seq_item item);
-    string path;
     logic [31:0] encoded;
 
-    vif.reset = 1'b1;
+    vif.reset   = 1'b1;
+    vif.load_en = 1'b0;
     repeat (2) @(posedge vif.clk);
 
-    // Backdoor Load
+    // Backdoor load: drive one word per clock; top.sv writes the instruction
+    // memory on posedge clk. Values are set on negedge for clean setup.
     for (int i = 0; i < INST_MEM_S; i++) begin
-      if (i < item.instrs.size()) begin
-        encoded = item.instrs[i].encode();
-      end else begin
-        encoded = NOP;
-      end
-      path = $sformatf("%s[%0d]", INST_MEM, i);
-      if (!uvm_hdl_deposit(path, encoded))
-        `uvm_error(get_type_name(),
-                   $sformatf("uvm_hdl_deposit failed for %s", path))
+      encoded = (i < item.instrs.size()) ? item.instrs[i].encode() : NOP;
+      @(negedge vif.clk);
+      vif.load_en   = 1'b1;
+      vif.load_addr = i[5:0];
+      vif.load_data = encoded;
     end
+    @(negedge vif.clk);
+    vif.load_en = 1'b0;
 
     @(posedge vif.clk);
     vif.reset = 1'b0;

@@ -38,8 +38,12 @@ class r_test extends base_test;
     seqr = tb.rv32i.agent.sequencer;                    // connect sequencer to uvc sequencer
   endfunction
 
-  task run_phase(uvm_phase phase);       
+  task run_phase(uvm_phase phase);
+    if (!r_seq.randomize())                               // pick num_instrs in [5:20]
+      `uvm_error(get_type_name(), "Randomization failed for r_seq")
+    phase.raise_objection(this);                         // keep run_phase alive while the seq runs
     r_seq.start(seqr);                                   // start sequence on sequencer
+    phase.drop_objection(this);
   endtask
 
 endclass
